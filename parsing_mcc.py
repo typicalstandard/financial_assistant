@@ -1,2 +1,2 @@
-def main():
+bdef main():
   pass
