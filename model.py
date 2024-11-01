@@ -56,4 +56,14 @@ class AccountModel:
         pattern_password = r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)([a-zA-Z\d]){8,25}$"
         return re.match(pattern_password, password)
 
-
+    def validate_and_create_account(self, account,phone, password):
+        if account is None:
+            if self.is_valid_phone(phone) and self.is_valid_password(password):
+                self.create_account(phone, password)
+                return 'created'
+            else:
+                return 'invalid_format'
+        elif account['Пароль'] == password and account['Телефон'] == phone:
+            return 'valid'
+        else:
+            return 'invalid_password'
