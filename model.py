@@ -27,3 +27,8 @@ class Database:
 
 
 
+class AccountModel:
+    def __init__(self):
+        self.db = Database()
+        self.cursor = self.db.get_cursor()
+
