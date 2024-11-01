@@ -48,4 +48,12 @@ class AccountModel:
         self.cursor.execute(insert_query, (phone, password))
         self.db.commit()
 
+    def is_valid_phone(self, phone):
+        pattern_phone = r"^\(\d{2}\) \d{3}-\d{2}-\d{2}$"
+        return re.match(pattern_phone, phone)
+
+    def is_valid_password(self, password):
+        pattern_password = r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)([a-zA-Z\d]){8,25}$"
+        return re.match(pattern_password, password)
+
 
