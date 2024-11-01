@@ -43,3 +43,9 @@ class AccountModel:
             return account_dict
         return None
 
+    def create_account(self, phone, password):
+        insert_query = "INSERT INTO account (Телефон,Пароль) VALUES (%s, %s)"
+        self.cursor.execute(insert_query, (phone, password))
+        self.db.commit()
+
+
