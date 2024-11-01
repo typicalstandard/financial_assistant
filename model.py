@@ -32,3 +32,14 @@ class AccountModel:
         self.db = Database()
         self.cursor = self.db.get_cursor()
 
+    def get_account(self, phone):
+        query = "SELECT * FROM account WHERE account.Телефон = %s"
+        self.cursor.execute(query, (phone,))
+        row = self.cursor.fetchone()
+
+        if row:
+            columns = [desc[0] for desc in self.cursor.description]
+            account_dict = dict(zip(columns, row))
+            return account_dict
+        return None
+
