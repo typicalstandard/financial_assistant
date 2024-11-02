@@ -87,7 +87,8 @@ class ProgressBarController:
             except:
                 QtWidgets.QMessageBox.information(self.view, 'Внимание', 'Ошибка в записи данных')
 
-
+        def show_ProgressBarController(self):
+            self.view.show()
 
 
 class TableController:
