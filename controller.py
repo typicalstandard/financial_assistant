@@ -1,6 +1,9 @@
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QDate
 from PyQt5.QtCore import QThread
+from model_ import TabelModel, DataModel, Parser, BankModel, AccountModel
+from pdf_convector import extract_and_process
+from view_ import TableView, CategoriesView, ProgressBarView, InsertView
 class LoginController:
     def __init__(self, model, view):
         self.model = model
@@ -29,6 +32,21 @@ class LoginController:
 
 
 class InsertController:
+        def __init__(self, account):
+            self.model = BankModel()
+            self.model2 = AccountModel()
+            self.view = InsertView()
+            self.account = account
+
+            self.setup_connections()
+
+        def setup_connections(self):
+            self.view.buttonBox.accepted.connect(self.ok_callback)
+
+        
+
+
+class ProgressBarController():
     pass
 
 class TableController:
