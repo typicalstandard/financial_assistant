@@ -70,6 +70,17 @@ class ProgressBarController:
             self.model2 = BankModel()
             self.model_thread = QThread()
 
+            self.model.moveToThread(self.model_thread)
+            self.model.progress.connect(self.view.update_progress)
+            self.model.resultReady.connect(self.handle_result)
+            self.model.error_occurred.connect(self.view.show_error)
+
+            self.model_thread.started.connect(self.model.run)
+            self.model_thread.start()
+
+        def handle_result(self, result):
+            pass
+
 
 class TableController:
     pass
