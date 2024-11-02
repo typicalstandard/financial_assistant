@@ -59,8 +59,17 @@ class InsertController:
             self.view.hide()
 
 
-class ProgressBarController():
-    pass
+class ProgressBarController:
+        def __init__(self, df, account):
+            self.df = df
+            self.account = account
+
+            self.view = ProgressBarView()
+            self.view2 = InsertView()
+            self.model = Parser(self.account['Пароль'], self.account['Телефон'], self.df)
+            self.model2 = BankModel()
+            self.model_thread = QThread()
+
 
 class TableController:
     pass
