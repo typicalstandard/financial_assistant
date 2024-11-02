@@ -113,3 +113,7 @@ class Parser(QObject):
         user_password = wait.until(EC.presence_of_element_located((By.NAME, 'password')))
         user_password.send_keys(self.password, Keys.RETURN)
 
+    def navigate_to_history(self, driver, wait):
+        history = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[@href='/history']")))
+        history.click()
+
