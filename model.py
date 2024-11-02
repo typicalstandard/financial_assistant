@@ -92,4 +92,15 @@ class Parser(QObject):
         self.phone = phone
         self.df = df
 
-
+    def run(self):
+        mcc_from_site = dict()
+        options = Options()
+        with webdriver.Firefox(options=options) as driver:
+                wait = WebDriverWait(driver, 10)
+                self.login(driver, wait)
+                time.sleep(4)
+                self.navigate_to_history(driver, wait)
+                time.sleep(1)
+                self.extract_mcc_codes(driver, wait, mcc_from_site)
+                time.sleep(2)
+                self.resultReady.emit(mcc_from_site)
