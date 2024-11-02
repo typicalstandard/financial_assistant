@@ -83,6 +83,13 @@ class Parser(QObject):
     resultReady = pyqtSignal(object)
     error_occurred = pyqtSignal(str)
 
+    def __init__(self, password, phone, df):
+        super().__init__()
 
+        self.db = Database()
+        self.cursor = self.db.get_cursor()
+        self.password = password
+        self.phone = phone
+        self.df = df
 
 
