@@ -1,9 +1,5 @@
 from PyQt5 import QtWidgets
-<<<<<<< HEAD
-=======
-from PyQt5.QtWidgets import QFileDialog
-
->>>>>>> insert_controller
+from PyQt5.QtWidgets import QFileDialog, QProgressBar, QVBoxLayout, QMessageBox
 from ui import Ui_Login, Ui_Form, Ui_Table
 
 class LoginView(QtWidgets.QWidget, Ui_Login):
@@ -15,9 +11,7 @@ class LoginView(QtWidgets.QWidget, Ui_Login):
 
     def cancel_callback(self):
         self.lineEdit.clear()
-<<<<<<< HEAD
         self.lineEdit_2.clear()
-=======
         self.lineEdit_2.clear()
 
 class InsertView(QtWidgets.QWidget, Ui_Form):
@@ -33,4 +27,15 @@ class InsertView(QtWidgets.QWidget, Ui_Form):
 
     def cancel_callback(self):
         self.lineEdit.clear()
->>>>>>> insert_controller
+
+class ProgressBarView(QtWidgets.QWidget):
+    def __init__(self):
+        super().__init__()
+        self.initUI()
+
+    def initUI(self):
+        layout = QVBoxLayout()
+        self.progressBar = QProgressBar(self)
+        layout.addWidget(self.progressBar)
+        self.setLayout(layout)
+
