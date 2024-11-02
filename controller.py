@@ -52,7 +52,11 @@ class InsertController:
                 self.controller = ProgressBarController(df=pdf_column_generator, account=self.account)
                 self.controller.show_ProgressBarController()
 
-   
+        def show_insertView(self):
+            self.view.show()
+
+        def hide_insertView(self):
+            self.view.hide()
 
 
 class ProgressBarController():
