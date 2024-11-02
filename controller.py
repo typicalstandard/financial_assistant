@@ -79,7 +79,15 @@ class ProgressBarController:
             self.model_thread.start()
 
         def handle_result(self, result):
-            pass
+            try:
+                self.model2.write_data(self.df, self.account['id'], result)
+                self.controller = TableController(self.account)
+                self.controller.show_tableview()
+                self.view.hide()
+            except:
+                QtWidgets.QMessageBox.information(self.view, 'Внимание', 'Ошибка в записи данных')
+
+
 
 
 class TableController:
