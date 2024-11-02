@@ -104,3 +104,12 @@ class Parser(QObject):
                 self.extract_mcc_codes(driver, wait, mcc_from_site)
                 time.sleep(2)
                 self.resultReady.emit(mcc_from_site)
+
+
+    def login(self, driver, wait):
+        driver.get("https://insnc.by/")
+        user_name = wait.until(EC.presence_of_element_located((By.NAME, 'phone')))
+        user_name.send_keys(self.phone, Keys.RETURN)
+        user_password = wait.until(EC.presence_of_element_located((By.NAME, 'password')))
+        user_password.send_keys(self.password, Keys.RETURN)
+
