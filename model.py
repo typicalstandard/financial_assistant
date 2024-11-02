@@ -117,3 +117,31 @@ class Parser(QObject):
         history = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[@href='/history']")))
         history.click()
 
+    def extract_mcc_codes(self, driver, wait, mcc_from_site):
+        x = 100 / 20
+        self.s = [0]
+        for column_table in self.df:
+          for name in column_table.keys():
+            next_term = self.s[-1] + x
+            self.s.append(next_term)
+            self.progress.emit(int(next_term))
+            try:
+                shopping_list = wait.until(
+                    EC.element_to_be_clickable((By.XPATH, "//button[@data-test-id='historyCell']")))
+                original_text = shopping_list.text
+                search = wait.until(EC.element_to_be_clickable((By.NAME, 'searchText')))
+                search.send_keys(name, Keys.RETURN)
+                check = wait.until_not(
+                    EC.text_to_be_present_in_element((By.XPATH, "//button[@data-test-id='historyCell']"),
+                                                     original_text))
+                if check:
+                    updated_shopping_list = wait.until(
+                        EC.element_to_be_clickable((By.XPATH, "//button[@data-test-id='historyCell']")))
+                    updated_shopping_list.click()
+                self.parse_side_panel(wait, mcc_from_site, name)
+                search.clear()
+            except Exception as e:
+                mcc_from_site[name] = 0
+                search.clear()
+                self.error_occurred.emit(f"Error processing {name}: {str(e)}")
+
