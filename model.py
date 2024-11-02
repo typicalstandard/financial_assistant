@@ -1,5 +1,14 @@
 import psycopg2
 import re
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from PyQt5.QtCore import QObject, pyqtSignal
+import time
+
 class Database:
     _instance = None
 
@@ -67,3 +76,13 @@ class AccountModel:
             return 'valid'
         else:
             return 'invalid_password'
+
+
+class Parser(QObject):
+    progress = pyqtSignal(int)
+    resultReady = pyqtSignal(object)
+    error_occurred = pyqtSignal(str)
+
+
+
+
