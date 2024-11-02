@@ -43,7 +43,16 @@ class InsertController:
         def setup_connections(self):
             self.view.buttonBox.accepted.connect(self.ok_callback)
 
-        
+        def ok_callback(self):
+
+            if not self.view.lineEdit.text():
+                QtWidgets.QMessageBox.information(self.view, 'Внимание', 'Введены не все значения')
+            else:
+                pdf_column_generator = list(extract_and_process(self.view.lineEdit.text()))
+                self.controller = ProgressBarController(df=pdf_column_generator, account=self.account)
+                self.controller.show_ProgressBarController()
+
+   
 
 
 class ProgressBarController():
