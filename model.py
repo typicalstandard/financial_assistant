@@ -145,3 +145,14 @@ class Parser(QObject):
                 search.clear()
                 self.error_occurred.emit(f"Error processing {name}: {str(e)}")
 
+    def parse_side_panel(self, wait, mcc_from_site, name):
+        try:
+            side_panel = wait.until(EC.visibility_of_element_located((
+                By.XPATH, "//div[@class='history-details-side-panel_mainContent__gnt+e']"))).text.split()
+            if side_panel[13].isdigit():
+                mcc_from_site[name] = side_panel[13]
+            else:
+                mcc_from_site[name] = 0
+        except Exception as e:
+            mcc_from_site[name] = 0
+            self.error_occurred.emit(f"Error parsing side panel for {name}: {str(e)}")
