@@ -59,8 +59,37 @@ class InsertController:
             self.view.hide()
 
 
-class ProgressBarController():
-    pass
+class ProgressBarController:
+        def __init__(self, df, account):
+            self.df = df
+            self.account = account
+
+            self.view = ProgressBarView()
+            self.view2 = InsertView()
+            self.model = Parser(self.account['Пароль'], self.account['Телефон'], self.df)
+            self.model2 = BankModel()
+            self.model_thread = QThread()
+
+            self.model.moveToThread(self.model_thread)
+            self.model.progress.connect(self.view.update_progress)
+            self.model.resultReady.connect(self.handle_result)
+            self.model.error_occurred.connect(self.view.show_error)
+
+            self.model_thread.started.connect(self.model.run)
+            self.model_thread.start()
+
+        def handle_result(self, result):
+            try:
+                self.model2.write_data(self.df, self.account['id'], result)
+                self.controller = TableController(self.account)
+                self.controller.show_tableview()
+                self.view.hide()
+            except:
+                QtWidgets.QMessageBox.information(self.view, 'Внимание', 'Ошибка в записи данных')
+
+        def show_ProgressBarController(self):
+            self.view.show()
+
 
 class TableController:
     pass
