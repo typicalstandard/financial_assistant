@@ -103,3 +103,17 @@ class BankModel:
             return False
         return True
 
+    def write_mcc_code(self, mcc_from_site):
+            insert_mcc_code = "INSERT INTO mcc_bank (Примечание, MCC, Категория) VALUES (%s, %s, %s)"
+            with open('csv/mcc_codes.csv', 'r', encoding='utf-8') as csvfile:
+                reader = csv.reader(csvfile)
+                mcc_codes = {row[0]: row[1] for row in reader}
+                try:
+                    for key in mcc_from_site:
+                        self.cursor.execute(insert_mcc_code,
+                                            (key, mcc_from_site[key], mcc_codes.get(mcc_from_site[key])))
+                except Exception as e:
+                    print(f"Произошла ошибка при записи кода MCC: {e}")
+                    return False
+            return True
+
