@@ -84,8 +84,6 @@ class BankModel:
         query = "SELECT * FROM mcc_bank"
         self.cursor.execute(query)
         return self.cursor.fetchall()
-
-
     def write_bank_statement(self,processed_data, account_id):
         insert_bank_statement = """
         INSERT INTO bank_statement 
@@ -134,3 +132,17 @@ class BankModel:
                 return False
             return True
 
+    def write_data(self,processed_data,account_id, mcc_from_site):
+            try:
+                self.cursor.execute("BEGIN;")  # Начать транзакцию
+                if not self.write_bank_statement(processed_data,account_id):
+                    raise Exception("Ошибка при записи банковской выписки")
+                if not self.write_mcc_code(mcc_from_site):
+                    raise Exception("Ошибка при записи кода MCC")
+                if not self.write_finally_statement():
+                    raise Exception("Ошибка при записи финальной выписки")
+                self.db.commit()
+                print("Данные успешно записаны.")
+            except Exception as e:
+                print(f"Произошла ошибка: {e}")
+                self.db.rollback()
