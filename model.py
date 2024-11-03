@@ -117,3 +117,20 @@ class BankModel:
                     return False
             return True
 
+    def write_finally_statement(self):
+            try:
+                join_query = """
+                       INSERT INTO finally_statement (Дата,Примечание,MCC,Категория,Сумма_в_валюте_счета,Сумма_в_валюте_операции,account_id)
+                       SELECT Дата,Примечание,MCC,Категория,Сумма_в_валюте_счета,Сумма_в_валюте_операции,account_id
+                       FROM bank_statement
+                       INNER JOIN mcc_bank USING (Примечание)
+                       WHERE bank_statement.Примечание IS NOT NULL AND bank_statement.Дата IS NOT NULL
+                       ORDER BY Дата;
+                   """
+                self.cursor.execute(join_query)
+
+            except Exception as e:
+                print(f"Произошла ошибка при записи финальной выписки: {e}")
+                return False
+            return True
+
