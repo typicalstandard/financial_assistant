@@ -70,17 +70,36 @@ class AccountModel:
             return 'invalid_password'
 
 class BankModel:
-        def __init__(self):
-            self.db = Database()
-            self.cursor = self.db.get_cursor()
+    def __init__(self):
+        self.db = Database()
+        self.cursor = self.db.get_cursor()
 
-        def get_bank_statement_notes(self):
-            query = "SELECT Примечание FROM bank_statement"
-            self.cursor.execute(query)
-            rows = self.cursor.fetchall()
-            return rows
+    def get_bank_statement_notes(self):
+        query = "SELECT Примечание FROM bank_statement"
+        self.cursor.execute(query)
+        rows = self.cursor.fetchall()
+        return rows
 
-        def get_mcc_data(self):
-            query = "SELECT * FROM mcc_bank"
-            self.cursor.execute(query)
-            return self.cursor.fetchall()
+    def get_mcc_data(self):
+        query = "SELECT * FROM mcc_bank"
+        self.cursor.execute(query)
+        return self.cursor.fetchall()
+
+
+    def write_bank_statement(self,processed_data, account_id):
+        insert_bank_statement = """
+        INSERT INTO bank_statement 
+        (Дата, Примечание, Сумма_в_валюте_счета, Сумма_в_валюте_операции, account_id) 
+        VALUES (%s, %s, %s, %s, %s)
+        """
+
+        try:
+            for data in processed_data:
+                for values in data.values():
+                    self.cursor.execute(insert_bank_statement, tuple(values) + (account_id,))
+
+        except Exception as e:
+            print(f"Произошла ошибка при записи банковской выписки: {e}")
+            return False
+        return True
+
