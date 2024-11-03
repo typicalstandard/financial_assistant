@@ -1,5 +1,6 @@
 import psycopg2
 import re
+import csv
 class Database:
     _instance = None
 
@@ -67,3 +68,9 @@ class AccountModel:
             return 'valid'
         else:
             return 'invalid_password'
+
+class BankModel:
+        def __init__(self):
+            self.db = Database()
+            self.cursor = self.db.get_cursor()
+
