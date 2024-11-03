@@ -74,3 +74,13 @@ class BankModel:
             self.db = Database()
             self.cursor = self.db.get_cursor()
 
+        def get_bank_statement_notes(self):
+            query = "SELECT Примечание FROM bank_statement"
+            self.cursor.execute(query)
+            rows = self.cursor.fetchall()
+            return rows
+
+        def get_mcc_data(self):
+            query = "SELECT * FROM mcc_bank"
+            self.cursor.execute(query)
+            return self.cursor.fetchall()
