@@ -131,3 +131,6 @@ class TableController:
             self.view.dateEdit_2.setMinimumDate(self.view.dateEdit.date())
         elif self.view.dateEdit.date() < self.view.dateEdit_2.date():
             self.view.dateEdit_2.setMinimumDate(self.view.dateEdit.date())
+
+    def on_combobox_changed(self, index):
+        self.selected_value = self.view.comboBox.itemText(index)
