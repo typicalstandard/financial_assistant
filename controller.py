@@ -116,7 +116,10 @@ class TableController:
 
             self.view.set_table_data(self.rows, self.column_names)
 
+            min_date = QDate.fromString(self.db.iloc[0, 0].strftime('%d.%m.%Y'), "dd.MM.yyyy")
+            max_date = QDate.fromString(self.db.iloc[-1, 0].strftime('%d.%m.%Y'), "dd.MM.yyyy")
 
+            self.view.set_date_range(min_date, max_date)
 
         else:
             self.controller = InsertController(self.account)
