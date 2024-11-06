@@ -1,5 +1,5 @@
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QFileDialog, QProgressBar, QVBoxLayout, QMessageBox
+from PyQt5.QtWidgets import QFileDialog, QProgressBar, QVBoxLayout, QMessageBox, QTableWidgetItem
 from ui import Ui_Login, Ui_Form, Ui_Table
 
 class LoginView(QtWidgets.QWidget, Ui_Login):
@@ -38,4 +38,20 @@ class ProgressBarView(QtWidgets.QWidget):
         self.progressBar = QProgressBar(self)
         layout.addWidget(self.progressBar)
         self.setLayout(layout)
+
+class TableView(QtWidgets.QWidget,Ui_Table):
+    def __init__(self):
+        super(TableView, self).__init__()
+        self.setupUi(self)
+
+
+    def set_table_data(self,rows,column_names):
+            self.tableWidget.setRowCount(len(rows))
+            self.tableWidget.setColumnCount(len(rows[0]))
+            self.tableWidget.setHorizontalHeaderLabels(column_names)
+            self.tableWidget.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
+
+            for i, row in enumerate(rows):
+                for j, val in enumerate(row):
+                        self.tableWidget.setItem(i, j, QTableWidgetItem(str(val)))
 
