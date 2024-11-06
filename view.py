@@ -55,3 +55,14 @@ class TableView(QtWidgets.QWidget,Ui_Table):
                 for j, val in enumerate(row):
                         self.tableWidget.setItem(i, j, QTableWidgetItem(str(val)))
 
+    def set_date_range(self, min_date, max_date):
+            self.dateEdit.setMinimumDate(min_date)
+            self.dateEdit.setMaximumDate(max_date)
+            self.dateEdit_2.setMinimumDate(min_date)
+            self.dateEdit_2.setMaximumDate(max_date)
+
+    def clear_layout(self, layout):
+        while layout.count():
+            child = layout.takeAt(0)
+            if child.widget():
+                child.widget().deleteLater()
