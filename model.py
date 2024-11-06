@@ -324,3 +324,7 @@ class TabelModel:
         self.cursor = self.db.get_cursor()
         self.engine = create_engine('подключение к бд')
 
+    def column_names(self):
+        column_names = [desc[0] for desc in self.cursor.description]
+        return column_names
+
