@@ -109,3 +109,16 @@ class TableController:
     def initialize_view(self):
         self.rows = self.model.fetch_account_statement_by_id(self.account['id'])
         self.db = self.model.read_finally_statement_by_id(self.account['id'])
+
+        if len(self.rows) != 0:
+            self.show_tableview()
+            self.column_names = self.model.column_names()
+
+            self.view.set_table_data(self.rows, self.column_names)
+
+
+
+        else:
+            self.controller = InsertController(self.account)
+            self.controller.show_insertView()
+            QtWidgets.QMessageBox.information(self.view, 'Внимание', 'Данных не найдено')
