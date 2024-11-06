@@ -358,3 +358,21 @@ class TabelModel:
         df = pd.read_sql(query, params={'value': account_id}, con=self.engine)
         return self.pandas(df)
 
+    def pandas(self, df):
+        df['Дата'] = pd.to_datetime(df['Дата'], format="%d.%m.%Y")
+
+        def check_number(x):
+            try:
+                num = float(x.split()[0])
+                return num
+            except:
+                return 0
+
+        df.dropna(inplace=True)
+
+        df['Сумма_в_валюте_счета'] = df['Сумма_в_валюте_счета'].apply(lambda x: check_number(x)).astype(float)
+        df['Доходы/Расходы'] = df['Сумма_в_валюте_счета'].apply(lambda x: 'Расходы' if x < 0 else 'Доходы')
+
+        df['Сумма_в_валюте_счета'] = df['Сумма_в_валюте_счета'].apply(lambda x: abs(x))
+
+        return df
