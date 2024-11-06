@@ -105,3 +105,7 @@ class TableController:
         self.view.dateEdit_2.editingFinished.connect(self.update_dates)
         self.view.comboBox.currentIndexChanged.connect(self.on_combobox_changed)
         self.view.buttonBox.accepted.connect(self.filtration)
+
+    def initialize_view(self):
+        self.rows = self.model.fetch_account_statement_by_id(self.account['id'])
+        self.db = self.model.read_finally_statement_by_id(self.account['id'])
