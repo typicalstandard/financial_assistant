@@ -8,7 +8,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from PyQt5.QtCore import QObject, pyqtSignal
 import time
-
+import pandas as pd
 import csv
 
 from sqlalchemy import create_engine
@@ -342,3 +342,19 @@ class TabelModel:
 
         self.cursor.execute(query, {'value': account_id})
         return self.cursor.fetchall()
+
+    def read_finally_statement_by_id(self, account_id):
+        query = """
+               SELECT * 
+               FROM finally_statement 
+               WHERE finally_statement.account_id = (
+                   SELECT id  
+                   FROM account 
+                   WHERE account.id = %(value)s
+               );
+               """
+        pd.set_option('display.max_columns', None)
+
+        df = pd.read_sql(query, params={'value': account_id}, con=self.engine)
+        return self.pandas(df)
+
