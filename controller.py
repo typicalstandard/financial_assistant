@@ -92,4 +92,16 @@ class ProgressBarController:
 
 
 class TableController:
-    pass
+    def __init__(self,account):
+        self.model = TabelModel()
+        self.view = TableView()
+        self.account = account
+
+        self.initialize_view()
+        self.setup_connections()
+
+    def setup_connections(self):
+        self.view.dateEdit.editingFinished.connect(self.update_dates)
+        self.view.dateEdit_2.editingFinished.connect(self.update_dates)
+        self.view.comboBox.currentIndexChanged.connect(self.on_combobox_changed)
+        self.view.buttonBox.accepted.connect(self.filtration)
