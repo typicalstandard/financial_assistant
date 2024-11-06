@@ -8,8 +8,12 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from PyQt5.QtCore import QObject, pyqtSignal
 import time
-
+import pandas as pd
 import csv
+
+from sqlalchemy import create_engine
+
+
 class Database:
     _instance = None
 
@@ -77,7 +81,6 @@ class AccountModel:
             return 'valid'
         else:
             return 'invalid_password'
-
 
 class Parser(QObject):
     progress = pyqtSignal(int)
@@ -158,6 +161,7 @@ class Parser(QObject):
             mcc_from_site[name] = 0
             self.error_occurred.emit(f"Error parsing side panel for {name}: {str(e)}")
 
+
 class BankModel:
     def __init__(self):
         self.db = Database()
@@ -235,3 +239,140 @@ class BankModel:
             except Exception as e:
                 print(f"Произошла ошибка: {e}")
                 self.db.rollback()
+
+class BankModel:
+    def __init__(self):
+        self.db = Database()
+        self.cursor = self.db.get_cursor()
+
+    def get_bank_statement_notes(self):
+        query = "SELECT Примечание FROM bank_statement"
+        self.cursor.execute(query)
+        rows = self.cursor.fetchall()
+        return rows
+
+    def get_mcc_data(self):
+        query = "SELECT * FROM mcc_bank"
+        self.cursor.execute(query)
+        return self.cursor.fetchall()
+    def write_bank_statement(self,processed_data, account_id):
+        insert_bank_statement = """
+        INSERT INTO bank_statement 
+        (Дата, Примечание, Сумма_в_валюте_счета, Сумма_в_валюте_операции, account_id) 
+        VALUES (%s, %s, %s, %s, %s)
+        """
+
+        try:
+            for data in processed_data:
+                for values in data.values():
+                    self.cursor.execute(insert_bank_statement, tuple(values) + (account_id,))
+
+        except Exception as e:
+            print(f"Произошла ошибка при записи банковской выписки: {e}")
+            return False
+        return True
+
+    def write_mcc_code(self, mcc_from_site):
+            insert_mcc_code = "INSERT INTO mcc_bank (Примечание, MCC, Категория) VALUES (%s, %s, %s)"
+            with open('csv/mcc_codes.csv', 'r', encoding='utf-8') as csvfile:
+                reader = csv.reader(csvfile)
+                mcc_codes = {row[0]: row[1] for row in reader}
+                try:
+                    for key in mcc_from_site:
+                        self.cursor.execute(insert_mcc_code,
+                                            (key, mcc_from_site[key], mcc_codes.get(mcc_from_site[key])))
+                except Exception as e:
+                    print(f"Произошла ошибка при записи кода MCC: {e}")
+                    return False
+            return True
+
+    def write_finally_statement(self):
+            try:
+                join_query = """
+                       INSERT INTO finally_statement (Дата,Примечание,MCC,Категория,Сумма_в_валюте_счета,Сумма_в_валюте_операции,account_id)
+                       SELECT Дата,Примечание,MCC,Категория,Сумма_в_валюте_счета,Сумма_в_валюте_операции,account_id
+                       FROM bank_statement
+                       INNER JOIN mcc_bank USING (Примечание)
+                       WHERE bank_statement.Примечание IS NOT NULL AND bank_statement.Дата IS NOT NULL
+                       ORDER BY Дата;
+                   """
+                self.cursor.execute(join_query)
+
+            except Exception as e:
+                print(f"Произошла ошибка при записи финальной выписки: {e}")
+                return False
+            return True
+
+    def write_data(self,processed_data,account_id, mcc_from_site):
+            try:
+                self.cursor.execute("BEGIN;")  # Начать транзакцию
+                if not self.write_bank_statement(processed_data,account_id):
+                    raise Exception("Ошибка при записи банковской выписки")
+                if not self.write_mcc_code(mcc_from_site):
+                    raise Exception("Ошибка при записи кода MCC")
+                if not self.write_finally_statement():
+                    raise Exception("Ошибка при записи финальной выписки")
+                self.db.commit()
+                print("Данные успешно записаны.")
+            except Exception as e:
+                print(f"Произошла ошибка: {e}")
+                self.db.rollback()
+
+class TabelModel:
+    def __init__(self):
+        self.db = Database()  # Используем Singleton для подключения к БД
+        self.cursor = self.db.get_cursor()
+        self.engine = create_engine('подключение к бд')
+
+    def column_names(self):
+        column_names = [desc[0] for desc in self.cursor.description]
+        return column_names
+
+
+    def fetch_account_statement_by_id(self, account_id):
+        query = """
+        SELECT * 
+        FROM finally_statement 
+        WHERE finally_statement.account_id = (
+            SELECT id  
+            FROM account 
+            WHERE account.id = %(value)s
+        );
+        """
+
+        self.cursor.execute(query, {'value': account_id})
+        return self.cursor.fetchall()
+
+    def read_finally_statement_by_id(self, account_id):
+        query = """
+               SELECT * 
+               FROM finally_statement 
+               WHERE finally_statement.account_id = (
+                   SELECT id  
+                   FROM account 
+                   WHERE account.id = %(value)s
+               );
+               """
+        pd.set_option('display.max_columns', None)
+
+        df = pd.read_sql(query, params={'value': account_id}, con=self.engine)
+        return self.pandas(df)
+
+    def pandas(self, df):
+        df['Дата'] = pd.to_datetime(df['Дата'], format="%d.%m.%Y")
+
+        def check_number(x):
+            try:
+                num = float(x.split()[0])
+                return num
+            except:
+                return 0
+
+        df.dropna(inplace=True)
+
+        df['Сумма_в_валюте_счета'] = df['Сумма_в_валюте_счета'].apply(lambda x: check_number(x)).astype(float)
+        df['Доходы/Расходы'] = df['Сумма_в_валюте_счета'].apply(lambda x: 'Расходы' if x < 0 else 'Доходы')
+
+        df['Сумма_в_валюте_счета'] = df['Сумма_в_валюте_счета'].apply(lambda x: abs(x))
+
+        return df
