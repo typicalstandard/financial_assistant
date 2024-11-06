@@ -328,3 +328,17 @@ class TabelModel:
         column_names = [desc[0] for desc in self.cursor.description]
         return column_names
 
+
+    def fetch_account_statement_by_id(self, account_id):
+        query = """
+        SELECT * 
+        FROM finally_statement 
+        WHERE finally_statement.account_id = (
+            SELECT id  
+            FROM account 
+            WHERE account.id = %(value)s
+        );
+        """
+
+        self.cursor.execute(query, {'value': account_id})
+        return self.cursor.fetchall()
