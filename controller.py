@@ -134,3 +134,19 @@ class TableController:
 
     def on_combobox_changed(self, index):
         self.selected_value = self.view.comboBox.itemText(index)
+
+
+    def filtration(self):
+        try:
+            self.first = self.view.dateEdit.date()
+            self.last = self.view.dateEdit_2.date()
+            self.view.clear_layout(self.view.formLayout)
+            self.view.clear_layout(self.view.verticalLayout)
+            CategoriesController(self.view.formLayout, self.view.verticalLayout, self.db,
+                                 self.first.toString('yyyy-MM-dd'),
+                                 self.last.toString('yyyy-MM-dd'), self.selected_value)
+        except Exception as e:
+            QtWidgets.QMessageBox.information(self.view, 'Внимание', f'{e}')
+
+class CategoriesController:
+    pass
