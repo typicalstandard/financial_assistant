@@ -125,3 +125,9 @@ class TableController:
             self.controller = InsertController(self.account)
             self.controller.show_insertView()
             QtWidgets.QMessageBox.information(self.view, 'Внимание', 'Данных не найдено')
+
+    def update_dates(self):
+        if self.view.dateEdit.date() > self.view.dateEdit_2.date():
+            self.view.dateEdit_2.setMinimumDate(self.view.dateEdit.date())
+        elif self.view.dateEdit.date() < self.view.dateEdit_2.date():
+            self.view.dateEdit_2.setMinimumDate(self.view.dateEdit.date())
