@@ -103,3 +103,10 @@ class CategoriesView(QtWidgets.QWidget):
         return colors
 
 
+    def update_chart(self, df_categories, colors):
+        sc = MplCanvas(self, width=5, height=4, dpi=100)
+        data = [float(i) for i in df_categories.tolist()]
+        ax = df_categories.plot(ax=sc.axes)
+        ax.pie(data, colors=colors, wedgeprops={"edgecolor": "black", 'linewidth': 1, 'antialiased': True})
+        self.verticalLayout.addWidget(sc)
+
