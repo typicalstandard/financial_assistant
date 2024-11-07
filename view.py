@@ -1,5 +1,9 @@
+from random import random
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QFileDialog, QProgressBar, QVBoxLayout, QMessageBox, QTableWidgetItem
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QFileDialog, QProgressBar, QVBoxLayout,QTableWidgetItem, QLabel
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
+from matplotlib.figure import Figure
 from ui import Ui_Login, Ui_Form, Ui_Table
 
 class LoginView(QtWidgets.QWidget, Ui_Login):
@@ -66,3 +70,16 @@ class TableView(QtWidgets.QWidget,Ui_Table):
             child = layout.takeAt(0)
             if child.widget():
                 child.widget().deleteLater()
+
+class MplCanvas(FigureCanvasQTAgg):
+    def __init__(self, parent=None, width=5, height=4, dpi=100):
+        fig = Figure(figsize=(width, height), dpi=dpi)
+        self.axes = fig.add_subplot(111)
+        super(MplCanvas, self).__init__(fig)
+
+class CategoriesView(QtWidgets.QWidget):
+    def __init__(self, formLayout, verticalLayout):
+        super(CategoriesView, self).__init__()
+        self.formLayout = formLayout
+        self.verticalLayout = verticalLayout
+
