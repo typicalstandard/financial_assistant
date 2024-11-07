@@ -149,4 +149,19 @@ class TableController:
             QtWidgets.QMessageBox.information(self.view, 'Внимание', f'{e}')
 
 class CategoriesController:
-    pass
+        def __init__(self, formLayout, verticalLayout, db, first_date, last_date, income_expense='Расходы'):
+            self.model = DataModel(db)
+            self.view = CategoriesView(formLayout, verticalLayout)
+            self.first_date = first_date
+            self.last_date = last_date
+            self.income_expense = income_expense
+            self.initialize_view()
+
+        def initialize_view(self):
+            _df = self.model.get_filtered_data(self.first_date, self.last_date, self.income_expense)
+            if _df is not None:
+                df_categories = self.model.get_top_categories(_df)
+                colors = self.view.update_progress_bars(df_categories)
+                self.view.update_chart(df_categories, colors)
+            else:
+                self.view.show_no_data_message()
