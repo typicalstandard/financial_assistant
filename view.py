@@ -110,3 +110,7 @@ class CategoriesView(QtWidgets.QWidget):
         ax.pie(data, colors=colors, wedgeprops={"edgecolor": "black", 'linewidth': 1, 'antialiased': True})
         self.verticalLayout.addWidget(sc)
 
+    def show_no_data_message(self):
+        self.label = QLabel("Нет данных")
+        self.label.setAlignment(Qt.AlignCenter)
+        self.formLayout.addRow(self.label)
