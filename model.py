@@ -376,3 +376,16 @@ class TabelModel:
         df['Сумма_в_валюте_счета'] = df['Сумма_в_валюте_счета'].apply(lambda x: abs(x))
 
         return df
+
+class DataModel:
+    def __init__(self,db):
+        self.db = db
+    def get_filtered_data(self, first_date, last_date, income_expense):
+        _df = self.db.groupby(
+            self.db['Категория'][
+                self.db['Дата'].between(first_date, last_date) &
+                (self.db['Доходы/Расходы'] == income_expense)
+            ]
+        )['Сумма_в_валюте_счета'].sum().sort_values(ascending=False)
+        return _df
+
