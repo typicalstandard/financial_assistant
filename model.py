@@ -389,3 +389,11 @@ class DataModel:
         )['Сумма_в_валюте_счета'].sum().sort_values(ascending=False)
         return _df
 
+    def get_top_categories(self, _df):
+        if len(_df) != 0:
+            df_categories = _df.iloc[:7]
+            if len(_df) > 7:
+                df_categories.loc["Прочее"] = _df[_df < df_categories.iloc[-1]].sum()
+            return df_categories
+        else:
+            return None
