@@ -1,9 +1,12 @@
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QDate
 from PyQt5.QtCore import QThread
-from model_ import TabelModel, DataModel, Parser, BankModel, AccountModel
+
+from model import TabelModel, DataModel, Parser, BankModel, AccountModel
 from pdf_convector import extract_and_process
-from view_ import TableView, CategoriesView, ProgressBarView, InsertView
+from view import TableView, CategoriesView, ProgressBarView, InsertView
+
+
 class LoginController:
     def __init__(self, model, view):
         self.model = model
@@ -32,67 +35,67 @@ class LoginController:
 
 
 class InsertController:
-        def __init__(self, account):
-            self.model = BankModel()
-            self.model2 = AccountModel()
-            self.view = InsertView()
-            self.account = account
+    def __init__(self, account):
+        self.model = BankModel()
+        self.model2 = AccountModel()
+        self.view = InsertView()
+        self.account = account
 
-            self.setup_connections()
+        self.setup_connections()
 
-        def setup_connections(self):
-            self.view.buttonBox.accepted.connect(self.ok_callback)
+    def setup_connections(self):
+        self.view.buttonBox.accepted.connect(self.ok_callback)
 
-        def ok_callback(self):
+    def ok_callback(self):
 
-            if not self.view.lineEdit.text():
-                QtWidgets.QMessageBox.information(self.view, 'Внимание', 'Введены не все значения')
-            else:
-                pdf_column_generator = list(extract_and_process(self.view.lineEdit.text()))
-                self.controller = ProgressBarController(df=pdf_column_generator, account=self.account)
-                self.controller.show_ProgressBarController()
+        if not self.view.lineEdit.text():
+            QtWidgets.QMessageBox.information(self.view, 'Внимание', 'Введены не все значения')
+        else:
+            pdf_column_generator = list(extract_and_process(self.view.lineEdit.text()))
+            self.controller = ProgressBarController(df=pdf_column_generator, account=self.account)
+            self.controller.show_ProgressBarController()
 
-        def show_insertView(self):
-            self.view.show()
+    def show_insertView(self):
+        self.view.show()
 
-        def hide_insertView(self):
-            self.view.hide()
+    def hide_insertView(self):
+        self.view.hide()
 
 
 class ProgressBarController:
-        def __init__(self, df, account):
-            self.df = df
-            self.account = account
+    def __init__(self, df, account):
+        self.df = df
+        self.account = account
 
-            self.view = ProgressBarView()
-            self.view2 = InsertView()
-            self.model = Parser(self.account['Пароль'], self.account['Телефон'], self.df)
-            self.model2 = BankModel()
-            self.model_thread = QThread()
+        self.view = ProgressBarView()
+        self.view2 = InsertView()
+        self.model = Parser(self.account['Пароль'], self.account['Телефон'], self.df)
+        self.model2 = BankModel()
+        self.model_thread = QThread()
 
-            self.model.moveToThread(self.model_thread)
-            self.model.progress.connect(self.view.update_progress)
-            self.model.resultReady.connect(self.handle_result)
-            self.model.error_occurred.connect(self.view.show_error)
+        self.model.moveToThread(self.model_thread)
+        self.model.progress.connect(self.view.update_progress)
+        self.model.resultReady.connect(self.handle_result)
+        self.model.error_occurred.connect(self.view.show_error)
 
-            self.model_thread.started.connect(self.model.run)
-            self.model_thread.start()
+        self.model_thread.started.connect(self.model.run)
+        self.model_thread.start()
 
-        def handle_result(self, result):
-            try:
-                self.model2.write_data(self.df, self.account['id'], result)
-                self.controller = TableController(self.account)
-                self.controller.show_tableview()
-                self.view.hide()
-            except:
-                QtWidgets.QMessageBox.information(self.view, 'Внимание', 'Ошибка в записи данных')
+    def handle_result(self, result):
+        try:
+            self.model2.write_data(self.df, self.account['id'], result)
+            self.controller = TableController(self.account)
+            self.controller.show_tableview()
+            self.view.hide()
+        except:
+            QtWidgets.QMessageBox.information(self.view, 'Внимание', 'Ошибка в записи данных')
 
-        def show_ProgressBarController(self):
-            self.view.show()
+    def show_ProgressBarController(self):
+        self.view.show()
 
 
 class TableController:
-    def __init__(self,account):
+    def __init__(self, account):
         self.model = TabelModel()
         self.view = TableView()
         self.account = account
@@ -135,7 +138,6 @@ class TableController:
     def on_combobox_changed(self, index):
         self.selected_value = self.view.comboBox.itemText(index)
 
-
     def filtration(self):
         try:
             self.first = self.view.dateEdit.date()
@@ -148,20 +150,21 @@ class TableController:
         except Exception as e:
             QtWidgets.QMessageBox.information(self.view, 'Внимание', f'{e}')
 
-class CategoriesController:
-        def __init__(self, formLayout, verticalLayout, db, first_date, last_date, income_expense='Расходы'):
-            self.model = DataModel(db)
-            self.view = CategoriesView(formLayout, verticalLayout)
-            self.first_date = first_date
-            self.last_date = last_date
-            self.income_expense = income_expense
-            self.initialize_view()
 
-        def initialize_view(self):
-            _df = self.model.get_filtered_data(self.first_date, self.last_date, self.income_expense)
-            if _df is not None:
-                df_categories = self.model.get_top_categories(_df)
-                colors = self.view.update_progress_bars(df_categories)
-                self.view.update_chart(df_categories, colors)
-            else:
-                self.view.show_no_data_message()
+class CategoriesController:
+    def __init__(self, formLayout, verticalLayout, db, first_date, last_date, income_expense='Расходы'):
+        self.model = DataModel(db)
+        self.view = CategoriesView(formLayout, verticalLayout)
+        self.first_date = first_date
+        self.last_date = last_date
+        self.income_expense = income_expense
+        self.initialize_view()
+
+    def initialize_view(self):
+        _df = self.model.get_filtered_data(self.first_date, self.last_date, self.income_expense)
+        if _df is not None:
+            df_categories = self.model.get_top_categories(_df)
+            colors = self.view.update_progress_bars(df_categories)
+            self.view.update_chart(df_categories, colors)
+        else:
+            self.view.show_no_data_message()

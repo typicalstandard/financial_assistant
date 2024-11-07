@@ -1,16 +1,16 @@
-import psycopg2
+import csv
 import re
+import time
+
+import pandas as pd
+import psycopg2
+from PyQt5.QtCore import QObject, pyqtSignal
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from PyQt5.QtCore import QObject, pyqtSignal
-import time
-import pandas as pd
-import csv
-
+from selenium.webdriver.support.ui import WebDriverWait
 from sqlalchemy import create_engine
 
 
@@ -38,7 +38,6 @@ class Database:
 
     def close(self):
         self.cursor.close()
-
 
 
 class AccountModel:
@@ -70,7 +69,7 @@ class AccountModel:
         pattern_password = r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)([a-zA-Z\d]){8,25}$"
         return re.match(pattern_password, password)
 
-    def validate_and_create_account(self, account,phone, password):
+    def validate_and_create_account(self, account, phone, password):
         if account is None:
             if self.is_valid_phone(phone) and self.is_valid_password(password):
                 self.create_account(phone, password)
@@ -81,6 +80,7 @@ class AccountModel:
             return 'valid'
         else:
             return 'invalid_password'
+
 
 class Parser(QObject):
     progress = pyqtSignal(int)
@@ -100,15 +100,14 @@ class Parser(QObject):
         mcc_from_site = dict()
         options = Options()
         with webdriver.Firefox(options=options) as driver:
-                wait = WebDriverWait(driver, 10)
-                self.login(driver, wait)
-                time.sleep(4)
-                self.navigate_to_history(driver, wait)
-                time.sleep(1)
-                self.extract_mcc_codes(driver, wait, mcc_from_site)
-                time.sleep(2)
-                self.resultReady.emit(mcc_from_site)
-
+            wait = WebDriverWait(driver, 10)
+            self.login(driver, wait)
+            time.sleep(4)
+            self.navigate_to_history(driver, wait)
+            time.sleep(1)
+            self.extract_mcc_codes(driver, wait, mcc_from_site)
+            time.sleep(2)
+            self.resultReady.emit(mcc_from_site)
 
     def login(self, driver, wait):
         driver.get("https://insnc.by/")
@@ -125,29 +124,29 @@ class Parser(QObject):
         x = 100 / 20
         self.s = [0]
         for column_table in self.df:
-          for name in column_table.keys():
-            next_term = self.s[-1] + x
-            self.s.append(next_term)
-            self.progress.emit(int(next_term))
-            try:
-                shopping_list = wait.until(
-                    EC.element_to_be_clickable((By.XPATH, "//button[@data-test-id='historyCell']")))
-                original_text = shopping_list.text
-                search = wait.until(EC.element_to_be_clickable((By.NAME, 'searchText')))
-                search.send_keys(name, Keys.RETURN)
-                check = wait.until_not(
-                    EC.text_to_be_present_in_element((By.XPATH, "//button[@data-test-id='historyCell']"),
-                                                     original_text))
-                if check:
-                    updated_shopping_list = wait.until(
+            for name in column_table.keys():
+                next_term = self.s[-1] + x
+                self.s.append(next_term)
+                self.progress.emit(int(next_term))
+                try:
+                    shopping_list = wait.until(
                         EC.element_to_be_clickable((By.XPATH, "//button[@data-test-id='historyCell']")))
-                    updated_shopping_list.click()
-                self.parse_side_panel(wait, mcc_from_site, name)
-                search.clear()
-            except Exception as e:
-                mcc_from_site[name] = 0
-                search.clear()
-                self.error_occurred.emit(f"Error processing {name}: {str(e)}")
+                    original_text = shopping_list.text
+                    search = wait.until(EC.element_to_be_clickable((By.NAME, 'searchText')))
+                    search.send_keys(name, Keys.RETURN)
+                    check = wait.until_not(
+                        EC.text_to_be_present_in_element((By.XPATH, "//button[@data-test-id='historyCell']"),
+                                                         original_text))
+                    if check:
+                        updated_shopping_list = wait.until(
+                            EC.element_to_be_clickable((By.XPATH, "//button[@data-test-id='historyCell']")))
+                        updated_shopping_list.click()
+                    self.parse_side_panel(wait, mcc_from_site, name)
+                    search.clear()
+                except Exception as e:
+                    mcc_from_site[name] = 0
+                    search.clear()
+                    self.error_occurred.emit(f"Error processing {name}: {str(e)}")
 
     def parse_side_panel(self, wait, mcc_from_site, name):
         try:
@@ -177,7 +176,8 @@ class BankModel:
         query = "SELECT * FROM mcc_bank"
         self.cursor.execute(query)
         return self.cursor.fetchall()
-    def write_bank_statement(self,processed_data, account_id):
+
+    def write_bank_statement(self, processed_data, account_id):
         insert_bank_statement = """
         INSERT INTO bank_statement 
         (Дата, Примечание, Сумма_в_валюте_счета, Сумма_в_валюте_операции, account_id) 
@@ -195,22 +195,22 @@ class BankModel:
         return True
 
     def write_mcc_code(self, mcc_from_site):
-            insert_mcc_code = "INSERT INTO mcc_bank (Примечание, MCC, Категория) VALUES (%s, %s, %s)"
-            with open('csv/mcc_codes.csv', 'r', encoding='utf-8') as csvfile:
-                reader = csv.reader(csvfile)
-                mcc_codes = {row[0]: row[1] for row in reader}
-                try:
-                    for key in mcc_from_site:
-                        self.cursor.execute(insert_mcc_code,
-                                            (key, mcc_from_site[key], mcc_codes.get(mcc_from_site[key])))
-                except Exception as e:
-                    print(f"Произошла ошибка при записи кода MCC: {e}")
-                    return False
-            return True
+        insert_mcc_code = "INSERT INTO mcc_bank (Примечание, MCC, Категория) VALUES (%s, %s, %s)"
+        with open('csv/mcc_codes.csv', 'r', encoding='utf-8') as csvfile:
+            reader = csv.reader(csvfile)
+            mcc_codes = {row[0]: row[1] for row in reader}
+            try:
+                for key in mcc_from_site:
+                    self.cursor.execute(insert_mcc_code,
+                                        (key, mcc_from_site[key], mcc_codes.get(mcc_from_site[key])))
+            except Exception as e:
+                print(f"Произошла ошибка при записи кода MCC: {e}")
+                return False
+        return True
 
     def write_finally_statement(self):
-            try:
-                join_query = """
+        try:
+            join_query = """
                        INSERT INTO finally_statement (Дата,Примечание,MCC,Категория,Сумма_в_валюте_счета,Сумма_в_валюте_операции,account_id)
                        SELECT Дата,Примечание,MCC,Категория,Сумма_в_валюте_счета,Сумма_в_валюте_операции,account_id
                        FROM bank_statement
@@ -218,27 +218,27 @@ class BankModel:
                        WHERE bank_statement.Примечание IS NOT NULL AND bank_statement.Дата IS NOT NULL
                        ORDER BY Дата;
                    """
-                self.cursor.execute(join_query)
+            self.cursor.execute(join_query)
 
-            except Exception as e:
-                print(f"Произошла ошибка при записи финальной выписки: {e}")
-                return False
-            return True
+        except Exception as e:
+            print(f"Произошла ошибка при записи финальной выписки: {e}")
+            return False
+        return True
 
-    def write_data(self,processed_data,account_id, mcc_from_site):
-            try:
-                self.cursor.execute("BEGIN;")  # Начать транзакцию
-                if not self.write_bank_statement(processed_data,account_id):
-                    raise Exception("Ошибка при записи банковской выписки")
-                if not self.write_mcc_code(mcc_from_site):
-                    raise Exception("Ошибка при записи кода MCC")
-                if not self.write_finally_statement():
-                    raise Exception("Ошибка при записи финальной выписки")
-                self.db.commit()
-                print("Данные успешно записаны.")
-            except Exception as e:
-                print(f"Произошла ошибка: {e}")
-                self.db.rollback()
+    def write_data(self, processed_data, account_id, mcc_from_site):
+        try:
+            self.cursor.execute("BEGIN;")  # Начать транзакцию
+            if not self.write_bank_statement(processed_data, account_id):
+                raise Exception("Ошибка при записи банковской выписки")
+            if not self.write_mcc_code(mcc_from_site):
+                raise Exception("Ошибка при записи кода MCC")
+            if not self.write_finally_statement():
+                raise Exception("Ошибка при записи финальной выписки")
+            self.db.commit()
+            print("Данные успешно записаны.")
+        except Exception as e:
+            print(f"Произошла ошибка: {e}")
+            self.db.rollback()
 
 
 class TabelModel:
@@ -250,7 +250,6 @@ class TabelModel:
     def column_names(self):
         column_names = [desc[0] for desc in self.cursor.description]
         return column_names
-
 
     def fetch_account_statement_by_id(self, account_id):
         query = """
@@ -300,15 +299,17 @@ class TabelModel:
 
         return df
 
+
 class DataModel:
-    def __init__(self,db):
+    def __init__(self, db):
         self.db = db
+
     def get_filtered_data(self, first_date, last_date, income_expense):
         _df = self.db.groupby(
             self.db['Категория'][
                 self.db['Дата'].between(first_date, last_date) &
                 (self.db['Доходы/Расходы'] == income_expense)
-            ]
+                ]
         )['Сумма_в_валюте_счета'].sum().sort_values(ascending=False)
         return _df
 
