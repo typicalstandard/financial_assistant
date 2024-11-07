@@ -83,3 +83,23 @@ class CategoriesView(QtWidgets.QWidget):
         self.formLayout = formLayout
         self.verticalLayout = verticalLayout
 
+    def color_generation(self):
+        r = lambda: random.randint(0, 255)
+        colors = '#%02X%02X%02X' % (r(), r(), r())
+        return colors
+
+    def update_progress_bars(self, df_categories):
+        colors = []
+        for col_name, data in df_categories.items():
+            color = self.color_generation()
+            colors.append(color)
+            pbar = QProgressBar()
+            pbar.setRange(0, int(df_categories.max()))
+            pbar.setStyleSheet(f"QProgressBar::chunk {{background-color: {color} }}")
+            pbar.setValue(int(data))
+            pbar.setFormat(f'{int(data)}')
+            pbar.setAlignment(Qt.AlignRight)
+            self.formLayout.addRow(col_name, pbar)
+        return colors
+
+
