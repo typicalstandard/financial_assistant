@@ -1,12 +1,12 @@
 from PyQt5 import QtWidgets
 from model import AccountModel
-from view import Ui_Login, LoginView
-from controler import LoginController
+from view import  LoginView
+from controller import LoginController
 import sys
 
 
 def main():
-    app = QtWidgets.QApplication(sys.argv)
+    app = QtWidgets .QApplication(sys.argv)
     model = AccountModel()
     view = LoginView()
     controller = LoginController(model, view)
