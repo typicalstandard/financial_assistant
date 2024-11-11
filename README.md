@@ -1,9 +1,11 @@
 # financial_assistant
 
-Docker(Postgres c инициализатором таблиц) 
+#Docker(Postgres c инициализатором таблиц) 
+
 docker-compose -f .yml up 
 
-IDE
+#IDE
+
 git clone https://github.com/typicalstandard/financial_assistant.git
 
 cd ваш_репозиторий
