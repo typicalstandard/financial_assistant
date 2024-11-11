@@ -1,6 +1,6 @@
 from PyQt5 import QtWidgets
-from model_ import AccountModel
-from view_ import Ui_Login, LoginView
+from model import AccountModel
+from view import Ui_Login, LoginView
 from controler import LoginController
 import sys
 
