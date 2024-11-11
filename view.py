@@ -1,10 +1,11 @@
 from random import random
+
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QFileDialog, QProgressBar, QVBoxLayout,QTableWidgetItem, QLabel
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
-from ui import Ui_Login, Ui_Form, Ui_Table
+from financial_assistant.ui import Ui_Login, Ui_Form, Ui_Table
 
 class LoginView(QtWidgets.QWidget, Ui_Login):
     def __init__(self):

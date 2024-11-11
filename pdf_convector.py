@@ -26,5 +26,3 @@ def process_table(tables):
                 if values[1] != '':
                     yield values
 
-pdf_path = 'your_pdf_path_here.pdf'
-processed_data = list(extract_and_process(pdf_path))
