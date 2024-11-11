@@ -5,7 +5,10 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QFileDialog, QProgressBar, QVBoxLayout,QTableWidgetItem, QLabel
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
-from financial_assistant.ui import Ui_Login, Ui_Form, Ui_Table
+
+from financial_assistant.ui.Ui_Form import Ui_Form
+from financial_assistant.ui.Ui_Login import Ui_Login
+from financial_assistant.ui.Ui_Table import Ui_Table
 
 class LoginView(QtWidgets.QWidget, Ui_Login):
     def __init__(self):
