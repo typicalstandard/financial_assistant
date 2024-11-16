@@ -18,7 +18,7 @@ docker-compose -f .yml up
 
 git clone https://github.com/typicalstandard/financial_assistant.git
 
-cd ваш_репозиторий
+cd financial_assistant
 
 pip install -r requirements.txt
 
